@@ -11,17 +11,58 @@ import android.widget.*;
 
 public class MainActivity extends Activity {
 
-    private static final int NAVY = Color.rgb(5, 24, 49);
-    private static final int NAVY2 = Color.rgb(10, 51, 78);
-    private static final int TEAL = Color.rgb(22, 184, 176);
+    private static final int NAVY = Color.rgb(5, 20, 43);
+    private static final int NAVY2 = Color.rgb(11, 48, 70);
+    private static final int TEAL = Color.rgb(24, 184, 174);
     private static final int GOLD = Color.rgb(211, 174, 105);
+    private static final int CREAM = Color.rgb(248, 246, 237);
     private static final int WHITE = Color.WHITE;
 
     private WebView webView;
     private FrameLayout screen;
 
-    private int dp(float value) {
-        return (int) (value * getResources().getDisplayMetrics().density + 0.5f);
+    private int dp(float v) {
+        return (int) (v * getResources().getDisplayMetrics().density + 0.5f);
+    }
+
+    private GradientDrawable shape(int color, int radius, int strokeColor) {
+        GradientDrawable d = new GradientDrawable();
+        d.setColor(color);
+        d.setCornerRadius(dp(radius));
+        if (strokeColor != Color.TRANSPARENT) {
+            d.setStroke(dp(1), strokeColor);
+        }
+        return d;
+    }
+
+    private GradientDrawable gradient(int a, int b, int radius) {
+        GradientDrawable d = new GradientDrawable(
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                new int[]{a, b}
+        );
+        d.setCornerRadius(dp(radius));
+        d.setStroke(dp(1), Color.argb(100, 211, 174, 105));
+        return d;
+    }
+
+    private TextView text(String value, int size, int color, boolean bold) {
+        TextView t = new TextView(this);
+        t.setText(value);
+        t.setTextSize(size);
+        t.setTextColor(color);
+        t.setGravity(Gravity.CENTER);
+        t.setTextDirection(View.TEXT_DIRECTION_RTL);
+        t.setTypeface(Typeface.create("sans-serif", bold ?
+                Typeface.BOLD : Typeface.NORMAL));
+        t.setIncludeFontPadding(true);
+        return t;
+    }
+
+    private LinearLayout.LayoutParams lp(int w, int h) {
+        return new LinearLayout.LayoutParams(
+                w < 0 ? w : dp(w),
+                h < 0 ? h : dp(h)
+        );
     }
 
     @Override
@@ -29,44 +70,7 @@ public class MainActivity extends Activity {
         super.onCreate(state);
         getWindow().setStatusBarColor(NAVY);
         getWindow().setNavigationBarColor(NAVY);
-        getWindow().getDecorView().setSystemUiVisibility(0);
         showHome();
-    }
-
-    private GradientDrawable gradient(int top, int bottom, int radius) {
-        GradientDrawable d = new GradientDrawable(
-                GradientDrawable.Orientation.TOP_BOTTOM,
-                new int[]{top, bottom}
-        );
-        d.setCornerRadius(dp(radius));
-        d.setStroke(dp(1), Color.argb(100, 40, 205, 190));
-        return d;
-    }
-
-    private GradientDrawable solid(int color, int radius) {
-        GradientDrawable d = new GradientDrawable();
-        d.setColor(color);
-        d.setCornerRadius(dp(radius));
-        return d;
-    }
-
-    private TextView makeText(String value, int size, int color, boolean bold) {
-        TextView t = new TextView(this);
-        t.setText(value);
-        t.setTextSize(size);
-        t.setTextColor(color);
-        t.setGravity(Gravity.CENTER);
-        t.setIncludeFontPadding(true);
-        if (bold) t.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-        t.setTextDirection(View.TEXT_DIRECTION_RTL);
-        return t;
-    }
-
-    private LinearLayout.LayoutParams params(int width, int height) {
-        return new LinearLayout.LayoutParams(
-                width < 0 ? width : dp(width),
-                height < 0 ? height : dp(height)
-        );
     }
 
     private void showHome() {
@@ -77,96 +81,83 @@ public class MainActivity extends Activity {
         }
 
         screen = new FrameLayout(this);
-
-        // پس زمینه
-        DecorativeBackground background = new DecorativeBackground();
-        screen.addView(background, new FrameLayout.LayoutParams(
-                -1, -1
-        ));
+        screen.addView(new IslamicBackground(),
+                new FrameLayout.LayoutParams(-1, -1));
 
         ScrollView scroll = new ScrollView(this);
         scroll.setFillViewport(true);
-        scroll.setClipToPadding(false);
         scroll.setVerticalScrollBarEnabled(false);
 
         LinearLayout content = new LinearLayout(this);
         content.setOrientation(LinearLayout.VERTICAL);
         content.setGravity(Gravity.CENTER_HORIZONTAL);
-        content.setPadding(dp(22), dp(35), dp(22), dp(25));
+        content.setPadding(dp(22), dp(25), dp(22), dp(25));
 
         scroll.addView(content);
         screen.addView(scroll, new FrameLayout.LayoutParams(-1, -1));
 
-        // نشان اصلی
-        TextView logo = makeText("۞", 55, TEAL, false);
-        logo.setBackground(gradient(NAVY2, NAVY, 100));
+        // نشان مرکزی
+        FrameLayout emblem = new FrameLayout(this);
+        GradientDrawable emblemBg = gradient(
+                Color.rgb(17, 75, 91), NAVY, 100);
+        emblem.setBackground(emblemBg);
+        emblem.setElevation(dp(8));
 
-        LinearLayout.LayoutParams lp = params(100, 100);
-        lp.gravity = Gravity.CENTER;
-        content.addView(logo, lp);
+        TextView emblemText = text("۞", 57, GOLD, false);
+        emblem.addView(emblemText, new FrameLayout.LayoutParams(-1, -1));
 
-        // عنوان
-        TextView title = makeText("سامانه مسجد", 32, WHITE, true);
-        LinearLayout.LayoutParams titleParams = params(-1, -2);
-        titleParams.topMargin = dp(17);
-        content.addView(title, titleParams);
+        LinearLayout.LayoutParams ep = lp(104, 104);
+        ep.gravity = Gravity.CENTER;
+        content.addView(emblem, ep);
 
-        TextView subtitle = makeText(
+        TextView title = text("سامانه مسجد", 31, WHITE, true);
+        LinearLayout.LayoutParams tp = lp(-1, -2);
+        tp.topMargin = dp(15);
+        content.addView(title, tp);
+
+        TextView subtitle = text(
                 "ارتباط، آموزش، تعالی",
-                16,
-                Color.rgb(180, 224, 225),
-                false
-        );
-        LinearLayout.LayoutParams subParams = params(-1, -2);
-        subParams.topMargin = dp(8);
-        content.addView(subtitle, subParams);
+                15, Color.rgb(190, 220, 218), false);
+        LinearLayout.LayoutParams sp = lp(-1, -2);
+        sp.topMargin = dp(5);
+        content.addView(subtitle, sp);
 
-        // جداکننده تزئینی
-        TextView ornament = makeText("──────  ✧  ──────", 17, GOLD, false);
-        LinearLayout.LayoutParams op = params(-1, 40);
-        op.topMargin = dp(13);
+        TextView ornament = text("✦  ━━━━━━━━━  ✦", 16, GOLD, false);
+        LinearLayout.LayoutParams op = lp(-1, 42);
+        op.topMargin = dp(10);
         content.addView(ornament, op);
 
-        TextView instruction = makeText(
+        TextView instruction = text(
                 "لطفاً نقش خود را انتخاب کنید",
-                17,
-                Color.rgb(195, 218, 230),
-                true
-        );
-        LinearLayout.LayoutParams ip = params(-1, -2);
-        ip.topMargin = dp(10);
-        ip.bottomMargin = dp(25);
+                17, WHITE, true);
+        LinearLayout.LayoutParams ip = lp(-1, -2);
+        ip.topMargin = dp(5);
+        ip.bottomMargin = dp(20);
         content.addView(instruction, ip);
 
-        // کارت مدیران و مربیان
         addRoleCard(
                 content,
                 "مدیران و مربیان",
                 "دسترسی به بخش مدیریت و برنامه‌های آموزشی",
-                "cleric",
+                "مدیریت و هدایت",
                 true,
                 "https://panah-shop.ir/#!/masajed"
         );
 
-        // کارت دانش آموزان
         addRoleCard(
                 content,
                 "دانش‌آموزان",
                 "دسترسی به محتوای آموزشی و فعالیت‌های فرهنگی",
-                "student",
+                "یادگیری و رشد",
                 false,
                 "https://panah-shop.ir/#!/teeneg"
         );
 
-        TextView footer = makeText(
+        TextView footer = text(
                 "مسجد، خانهٔ دل‌ها",
-                16,
-                Color.rgb(220, 196, 145),
-                false
-        );
-
-        LinearLayout.LayoutParams fp = params(-1, 50);
-        fp.topMargin = dp(22);
+                15, Color.rgb(221, 195, 145), false);
+        LinearLayout.LayoutParams fp = lp(-1, 48);
+        fp.topMargin = dp(8);
         content.addView(footer, fp);
 
         setContentView(screen);
@@ -174,246 +165,222 @@ public class MainActivity extends Activity {
 
     private void addRoleCard(
             LinearLayout parent,
-            String title,
+            String headingText,
             String description,
-            String iconType,
+            String smallTitle,
             boolean dark,
             String url
     ) {
         LinearLayout card = new LinearLayout(this);
         card.setOrientation(LinearLayout.VERTICAL);
         card.setGravity(Gravity.CENTER_HORIZONTAL);
-        card.setPadding(dp(20), dp(20), dp(20), dp(20));
+        card.setPadding(dp(20), dp(18), dp(20), dp(20));
 
         if (dark) {
             card.setBackground(gradient(
-                    Color.rgb(12, 62, 91),
-                    NAVY,
-                    25
-            ));
+                    Color.rgb(15, 67, 88),
+                    Color.rgb(7, 31, 54), 24));
         } else {
             card.setBackground(gradient(
-                    Color.rgb(255, 255, 250),
-                    Color.rgb(230, 246, 243),
-                    25
-            ));
+                    Color.rgb(255, 253, 246),
+                    Color.rgb(231, 243, 237), 24));
         }
 
-        // آیکون اختصاصی
-        RoleIcon icon = new RoleIcon(iconType, dark);
-        LinearLayout.LayoutParams iconParams = params(112, 112);
-        iconParams.gravity = Gravity.CENTER;
-        card.addView(icon, iconParams);
+        card.setElevation(dp(7));
 
-        int textColor = dark ? WHITE : NAVY;
-
-        TextView heading = makeText(title, 21, textColor, true);
-        LinearLayout.LayoutParams hp = params(-1, -2);
-        hp.topMargin = dp(12);
-        card.addView(heading, hp);
-
-        TextView detail = makeText(
-                description,
-                14,
-                dark ? Color.rgb(183, 218, 229) :
-                        Color.rgb(55, 91, 105),
-                false
-        );
-
-        detail.setMaxLines(2);
-
-        LinearLayout.LayoutParams detailParams = params(-1, -2);
-        detailParams.topMargin = dp(9);
-        card.addView(detail, detailParams);
-
-        // دکمه ورود
-        TextView button = makeText("ورود به بخش   ←", 16, WHITE, true);
-        button.setBackground(gradient(
-                Color.rgb(14, 172, 171),
-                Color.rgb(4, 113, 142),
-                24
+        // نشان تصویری هندسی
+        FrameLayout iconFrame = new FrameLayout(this);
+        iconFrame.setBackground(shape(
+                dark ? Color.rgb(7, 39, 60) : Color.rgb(220, 238, 230),
+                60,
+                dark ? GOLD : Color.rgb(178, 147, 91)
         ));
 
-        LinearLayout.LayoutParams bp = params(-1, 52);
-        bp.topMargin = dp(19);
+        RoleSymbol symbol = new RoleSymbol(dark);
+        iconFrame.addView(symbol, new FrameLayout.LayoutParams(-1, -1));
+
+        LinearLayout.LayoutParams iconLp = lp(106, 106);
+        iconLp.gravity = Gravity.CENTER;
+        card.addView(iconFrame, iconLp);
+
+        TextView heading = text(
+                headingText, 21, dark ? WHITE : NAVY, true);
+        LinearLayout.LayoutParams hp = lp(-1, -2);
+        hp.topMargin = dp(13);
+        card.addView(heading, hp);
+
+        TextView tag = text(
+                smallTitle, 13,
+                dark ? Color.rgb(226, 195, 133) :
+                        Color.rgb(13, 125, 122),
+                true
+        );
+        LinearLayout.LayoutParams tagp = lp(-1, -2);
+        tagp.topMargin = dp(5);
+        card.addView(tag, tagp);
+
+        TextView detail = text(
+                description, 14,
+                dark ? Color.rgb(195, 220, 226) :
+                        Color.rgb(65, 91, 91),
+                false
+        );
+        detail.setMaxLines(2);
+        LinearLayout.LayoutParams dp = lp(-1, -2);
+        dp.topMargin = dp(9);
+        card.addView(detail, dp);
+
+        TextView button = text(
+                "ورود به بخش     ←", 16, WHITE, true);
+        button.setBackground(gradient(
+                Color.rgb(21, 177, 166),
+                Color.rgb(5, 117, 133), 28));
+
+        LinearLayout.LayoutParams bp = lp(-1, 52);
+        bp.topMargin = dp(18);
         card.addView(button, bp);
 
         button.setOnClickListener(v -> openPanel(url));
+        card.setOnClickListener(v -> openPanel(url));
 
-        card.setElevation(dp(8));
-
-        LinearLayout.LayoutParams cp = params(-1, -2);
-        cp.bottomMargin = dp(20);
+        LinearLayout.LayoutParams cp = lp(-1, -2);
+        cp.bottomMargin = dp(18);
         parent.addView(card, cp);
     }
 
-    // تصویرسازی برداری روحانی و دانش آموز
-    private class RoleIcon extends View {
-
-        private final String type;
-        private final boolean dark;
+    private class RoleSymbol extends View {
         private final Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final boolean dark;
 
-        RoleIcon(String type, boolean dark) {
+        RoleSymbol(boolean dark) {
             super(MainActivity.this);
-            this.type = type;
             this.dark = dark;
         }
 
-        private void paint(Canvas c, int color, Paint.Style style, float width) {
+        private void line(Canvas c, int color, float width) {
             p.setColor(color);
-            p.setStyle(style);
+            p.setStyle(Paint.Style.STROKE);
             p.setStrokeWidth(width);
             p.setStrokeCap(Paint.Cap.ROUND);
             p.setStrokeJoin(Paint.Join.ROUND);
         }
 
         @Override
-        protected void onDraw(Canvas canvas) {
-            super.onDraw(canvas);
+        protected void onDraw(Canvas c) {
+            super.onDraw(c);
+            float s = Math.min(getWidth(), getHeight()) / 100f;
+            c.save();
+            c.scale(s, s);
 
-            float s = Math.min(getWidth(), getHeight()) / 120f;
-            canvas.save();
-            canvas.scale(s, s);
-
-            int primary = dark ? Color.rgb(25, 205, 192) : NAVY2;
-            int skin = Color.rgb(242, 208, 177);
+            int main = dark ? GOLD : Color.rgb(13, 119, 117);
+            int secondary = dark ? TEAL : NAVY2;
 
             // قاب محرابی
-            paint(canvas, primary, Paint.Style.STROKE, 2.2f);
+            line(c, main, 2.2f);
             Path arch = new Path();
-            arch.moveTo(15, 105);
-            arch.lineTo(15, 48);
-            arch.quadTo(15, 30, 38, 25);
-            arch.lineTo(60, 7);
-            arch.lineTo(82, 25);
-            arch.quadTo(105, 30, 105, 48);
-            arch.lineTo(105, 105);
-            canvas.drawPath(arch, p);
+            arch.moveTo(18, 83);
+            arch.lineTo(18, 39);
+            arch.quadTo(18, 21, 39, 18);
+            arch.lineTo(50, 8);
+            arch.lineTo(61, 18);
+            arch.quadTo(82, 21, 82, 39);
+            arch.lineTo(82, 83);
+            c.drawPath(arch, p);
 
-            if (type.equals("cleric")) {
-                // بدن و عبا
-                paint(canvas, dark ? Color.rgb(10, 104, 128) :
-                        Color.rgb(15, 75, 100), Paint.Style.FILL, 1);
-                Path robe = new Path();
-                robe.moveTo(34, 104);
-                robe.quadTo(37, 75, 49, 70);
-                robe.lineTo(71, 70);
-                robe.quadTo(85, 78, 88, 104);
-                robe.close();
-                canvas.drawPath(robe, p);
+            // کتاب باز
+            p.setColor(secondary);
+            p.setStyle(Paint.Style.FILL);
+            Path book = new Path();
+            book.moveTo(24, 55);
+            book.quadTo(38, 49, 49, 57);
+            book.lineTo(49, 78);
+            book.quadTo(36, 70, 24, 76);
+            book.close();
+            c.drawPath(book, p);
 
-                // صورت
-                paint(canvas, skin, Paint.Style.FILL, 1);
-                canvas.drawOval(43, 34, 77, 76, p);
+            Path book2 = new Path();
+            book2.moveTo(76, 55);
+            book2.quadTo(62, 49, 51, 57);
+            book2.lineTo(51, 78);
+            book2.quadTo(64, 70, 76, 76);
+            book2.close();
+            c.drawPath(book2, p);
 
-                // عمامه
-                paint(canvas, WHITE, Paint.Style.FILL, 1);
-                canvas.drawOval(37, 22, 83, 48, p);
-                canvas.drawRoundRect(40, 31, 80, 42, 7, 7, p);
+            line(c, main, 1.7f);
+            c.drawLine(50, 57, 50, 79, p);
+            c.drawLine(31, 60, 43, 62, p);
+            c.drawLine(57, 62, 69, 60, p);
 
-                // ریش
-                paint(canvas, Color.rgb(45, 48, 54), Paint.Style.FILL, 1);
-                Path beard = new Path();
-                beard.moveTo(43, 58);
-                beard.quadTo(60, 76, 77, 58);
-                beard.quadTo(76, 83, 60, 85);
-                beard.quadTo(44, 82, 43, 58);
-                canvas.drawPath(beard, p);
+            // ستارهٔ بالای کتاب
+            p.setColor(main);
+            p.setStyle(Paint.Style.FILL);
+            Path star = new Path();
+            star.moveTo(50, 27);
+            star.lineTo(54, 36);
+            star.lineTo(64, 37);
+            star.lineTo(57, 44);
+            star.lineTo(59, 54);
+            star.lineTo(50, 49);
+            star.lineTo(41, 54);
+            star.lineTo(43, 44);
+            star.lineTo(36, 37);
+            star.lineTo(46, 36);
+            star.close();
+            c.drawPath(star, p);
 
-                // چشم ها
-                paint(canvas, NAVY, Paint.Style.FILL, 1);
-                canvas.drawCircle(52, 53, 1.7f, p);
-                canvas.drawCircle(68, 53, 1.7f, p);
-
-                // کتاب در دست
-                paint(canvas, GOLD, Paint.Style.STROKE, 2);
-                canvas.drawLine(60, 79, 60, 102, p);
-            } else {
-                // بدن دانش آموز
-                paint(canvas, Color.rgb(20, 145, 165),
-                        Paint.Style.FILL, 1);
-                canvas.drawRoundRect(35, 67, 85, 105, 12, 12, p);
-
-                // صورت
-                paint(canvas, skin, Paint.Style.FILL, 1);
-                canvas.drawOval(43, 28, 77, 69, p);
-
-                // مو
-                paint(canvas, Color.rgb(48, 57, 69),
-                        Paint.Style.FILL, 1);
-                canvas.drawArc(41, 23, 79, 55, 180, 180, true, p);
-
-                // کتاب باز
-                paint(canvas, WHITE, Paint.Style.FILL, 1);
-                Path book = new Path();
-                book.moveTo(18, 80);
-                book.lineTo(59, 88);
-                book.lineTo(59, 108);
-                book.lineTo(18, 99);
-                book.close();
-                canvas.drawPath(book, p);
-
-                book.reset();
-                book.moveTo(102, 80);
-                book.lineTo(61, 88);
-                book.lineTo(61, 108);
-                book.lineTo(102, 99);
-                book.close();
-                canvas.drawPath(book, p);
-
-                paint(canvas, GOLD, Paint.Style.STROKE, 1.5f);
-                canvas.drawLine(60, 88, 60, 108, p);
-            }
-
-            canvas.restore();
+            c.restore();
         }
     }
 
-    // پس زمینه با نقوش هندسی
-    private class DecorativeBackground extends View {
-
+    private class IslamicBackground extends View {
         private final Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
 
-        DecorativeBackground() {
+        IslamicBackground() {
             super(MainActivity.this);
         }
 
         @Override
-        protected void onDraw(Canvas canvas) {
-            super.onDraw(canvas);
+        protected void onDraw(Canvas c) {
+            super.onDraw(c);
 
             float w = getWidth();
             float h = getHeight();
 
             p.setShader(new LinearGradient(
                     0, 0, w, h,
-                    NAVY2, NAVY,
+                    Color.rgb(13, 58, 78),
+                    NAVY,
                     Shader.TileMode.CLAMP
             ));
-            canvas.drawRect(0, 0, w, h, p);
+            c.drawRect(0, 0, w, h, p);
             p.setShader(null);
 
-            p.setColor(Color.argb(22, 31, 207, 191));
+            // قوس معماری بزرگ
+            p.setColor(Color.argb(35, 211, 174, 105));
             p.setStyle(Paint.Style.STROKE);
+            p.setStrokeWidth(dp(2));
+
+            RectF arch = new RectF(
+                    w * .12f, -h * .13f,
+                    w * .88f, h * .43f);
+            c.drawArc(arch, 180, 180, false, p);
+
+            // نقوش هندسی
+            p.setColor(Color.argb(25, 40, 206, 188));
             p.setStrokeWidth(dp(1));
 
-            float unit = dp(28);
-
+            float unit = dp(35);
             for (float x = 0; x < w + unit; x += unit) {
                 for (float y = 0; y < h + unit; y += unit) {
-                    canvas.drawLine(x, y, x + unit / 2, y + unit / 2, p);
-                    canvas.drawLine(x + unit / 2, y + unit / 2,
+                    c.drawLine(x, y, x + unit / 2, y + unit / 2, p);
+                    c.drawLine(x + unit / 2, y + unit / 2,
                             x + unit, y, p);
                 }
             }
 
-            p.setColor(Color.argb(35, 211, 174, 105));
-            p.setStrokeWidth(dp(2));
-            canvas.drawArc(
-                    -w * .6f, -dp(120), w * 1.5f, dp(300),
-                    0, 180, false, p
-            );
+            p.setStyle(Paint.Style.FILL);
+            p.setColor(Color.argb(15, 211, 174, 105));
+            c.drawCircle(w * .5f, h * .42f, w * .43f, p);
         }
     }
 
@@ -422,19 +389,15 @@ public class MainActivity extends Activity {
 
         LinearLayout container = new LinearLayout(this);
         container.setOrientation(LinearLayout.VERTICAL);
-        container.setBackgroundColor(Color.WHITE);
+        container.setBackgroundColor(WHITE);
 
-        TextView bar = makeText(
-                "سامانه مسجد     ← بازگشت",
-                16,
-                WHITE,
-                true
-        );
-
+        TextView bar = text(
+                "سامانه مسجد       ← بازگشت",
+                16, WHITE, true);
         bar.setBackgroundColor(NAVY);
         bar.setOnClickListener(v -> showHome());
 
-        container.addView(bar, params(-1, 55));
+        container.addView(bar, lp(-1, 55));
 
         webView = new WebView(this);
         webView.getSettings().setJavaScriptEnabled(true);
@@ -447,7 +410,6 @@ public class MainActivity extends Activity {
 
         screen.addView(container);
         setContentView(screen);
-
         webView.loadUrl(url);
     }
 
