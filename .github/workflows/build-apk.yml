@@ -1,12 +1,16 @@
-
+```yaml
 name: Build Android APK
 
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -29,11 +33,15 @@ jobs:
         run: |
           ls -lh app/build/outputs/apk/debug/
           file app/build/outputs/apk/debug/app-debug.apk
-          unzip -l app/build/outputs/apk/debug/app-debug.apk
+          unzip -t app/build/outputs/apk/debug/app-debug.apk
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: SamanehMasjed-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
+      - name: Save APK to separate branch
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk /tmp/app-debug.apk
+          git checkout --orphan apk-download
+          git rm -rf .
+          mkdir -p download
+          cp /tmp/app-debug.apk download/SamanehMasjed.apk
+          git add download/SamanehMasjed.apk
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "Publish Android APK"
+          git push origin apk-download --force
